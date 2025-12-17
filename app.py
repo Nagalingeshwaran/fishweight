@@ -36,4 +36,3 @@ if st.button("Predict"):
     # 4. Display Result
     st.success(f"The predicted value is: {prediction[0]:.2f}")
 
-st.info("Ensure the 'fish_poly_model (1).pkl' file is in the same folder as this script.")
