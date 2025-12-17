@@ -1,39 +1,32 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
+import pickle
 
 # App title
 st.title("🐟 Fish Weight Prediction using Polynomial Regression")
 
 st.write("""
-This app predicts **Fish Weight** using **Polynomial Regression**  
-based on fish body measurements.
+This app predicts **Fish Weight** using a **Pre-trained Polynomial Regression Model**.
 """)
 
-# Load dataset
-df = pd.read_csv("Fish.csv")
-st.subheader("Dataset Preview")
-st.dataframe(df.head())
+# Load model
+with open("fish_poly_model.pkl", "rb") as f:
+     model = pickle.load(f)
 
-# Select features and target
-X = df[['Length1', 'Length2', 'Length3', 'Height', 'Width']]
-y = df['Weight']
+st.success("Model loaded successfully!")
 
-# Degree selection
-degree = st.slider("Select Polynomial Degree", min_value=1, max_value=4, value=2)
+# Input section
+st.subheader("Enter Fish Measurements")
 
-# Polynomial transformation
-poly = PolynomialFeatures(degree=degree)
-X_poly = poly.fit_transform(X)
+l1 = st.number_input("Length1", value=20.0)
+l2 = st.number_input("Length2", value=22.0)
+l3 = st.number_input("Length3", value=25.0)
+h = st.number_input("Height", value=6.0)
+w = st.number_input("Width", value=4.0)
 
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(
-    X_poly, y, test_size=0.2, random_state=42
-)
-
-# Train model
-model = LinearRegre
+# Prediction
+if st.button("Predict Weight"):
+    input_data = np.array([[l1, l2, l3, h, w]])
+    input_poly = poly.transform(input_data)
+    prediction = model.predict(input_poly)
+    st.success(f"Predicted Fish Weight: **{prediction[0]:.2f} grams**")
