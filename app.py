@@ -6,7 +6,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 with open(os.path.join(BASE_DIR, "fish_poly_model.pkl"), "rb") as f:
-    poly, model = pickle.load(f)
+     model = pickle.load(f)
 
 st.title("🐟 Fish Weight Prediction")
 
