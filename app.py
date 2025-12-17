@@ -1,51 +1,39 @@
 import streamlit as st
 import pandas as pd
-import joblib
 import numpy as np
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
 
-# Set page config
-st.set_page_config(page_title="Fish Weight Predictor", layout="wide")
+# App title
+st.title("🐟 Fish Weight Prediction using Polynomial Regression")
 
-st.title("🐟 Fish Weight Prediction App")
 st.write("""
-This app uses a Polynomial Linear Regression model to predict the weight of a fish 
-based on 26 distinct features.
+This app predicts **Fish Weight** using **Polynomial Regression**  
+based on fish body measurements.
 """)
 
-# Load the model
-@st.cache_resource
-def load_model():
-    # Ensure fish_poly_model.pkl is in the same directory
-    return joblib.load("fish_poly_model.pkl")
+# Load dataset
+df = pd.read_csv("Fish.csv")
+st.subheader("Dataset Preview")
+st.dataframe(df.head())
 
-try:
-    model = load_model()
-    
-    st.sidebar.header("Input Fish Metrics")
-    st.sidebar.info("The model requires 26 numerical features (polynomial features).")
+# Select features and target
+X = df[['Length1', 'Length2', 'Length3', 'Height', 'Width']]
+y = df['Weight']
 
-    # Create 26 input fields dynamically
-    inputs = []
-    cols = st.columns(4) # Distribute inputs in 4 columns for better UI
-    
-    for i in range(5):
-        with cols[i % 4]:
-            val = st.number_input(f"Feature {i+1}", value=0.0, step=0.1, format="%.2f")
-            inputs.append(val)
+# Degree selection
+degree = st.slider("Select Polynomial Degree", min_value=1, max_value=4, value=2)
 
-    # Prediction logic
-    if st.button("Predict Weight"):
-        # Reshape input for sklearn
-        input_array = np.array(inputs).reshape(1, -1)
-        prediction = model.predict(input_array)
-        
-        st.success(f"### Predicted Weight: {prediction[0]:.2f} units")
-        
-        # Display the input data for reference
-        with st.expander("View Input Vector"):
-            st.write(input_array)
+# Polynomial transformation
+poly = PolynomialFeatures(degree=degree)
+X_poly = poly.fit_transform(X)
 
-except FileNotFoundError:
-    st.error("Error: 'fish_poly_model.pkl' not found. Please ensure the file is in the app directory.")
-except Exception as e:
-    st.error(f"An error occurred: {e}")
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X_poly, y, test_size=0.2, random_state=42
+)
+
+# Train model
+model = LinearRegre
