@@ -5,7 +5,7 @@ import pickle
 st.title("🐟 Fish Weight Prediction")
 
 # Load model
-with open("fish.pkl", "rb") as f:
+with open("fish_poly_model.pkl", "rb") as f:
     poly, model = pickle.load(f)
 
 st.success("Model loaded successfully")
