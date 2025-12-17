@@ -9,7 +9,7 @@ st.write("Predict fish weight using a **Polynomial Regression model**")
 
 # Load trained model
 with open("fish_poly_model.pkl", "rb") as f:
-    poly, model = pickle.load(f)
+     model = pickle.load(f)
 
 st.success("✅ Model loaded successfully")
 
@@ -23,6 +23,6 @@ w  = st.number_input("Width (cm)",   0.0, 30.0,  4.0)
 
 if st.button("Predict Weight"):
     input_data = np.array([[l1, l2, l3, h, w]])
-    input_poly = poly.transform(input_data)
+    input_poly = transform(input_data)
     prediction = model.predict(input_poly)
     st.success(f"🐟 Predicted Fish Weight: **{prediction[0]:.2f} grams**")
