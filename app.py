@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 from sklearn.preprocessing import PolynomialFeatures
 
-# 
+# Set Page Config
 st.set_page_config(page_title="Fish Weight Predictor", layout="wide", page_icon="🐟")
 
 # --- Load Model and Setup Transformer ---
