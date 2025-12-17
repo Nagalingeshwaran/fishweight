@@ -5,60 +5,65 @@ import pickle
 from sklearn.preprocessing import PolynomialFeatures
 
 # Page configuration
-st.set_page_config(page_title="Fish Weight Predictor", layout="centered")
+st.set_page_config(page_title="Fish Weight Predictor", page_icon="🐟")
 
-# --- Load the Model and Preprocessor ---
+# --- Load the Model and Setup Transformer ---
 @st.cache_resource
-def load_model_and_poly():
-    # Load the pre-trained linear regression model
+def load_resources():
+    # Load your uploaded pickle model
     with open('fish_poly_model (1).pkl', 'rb') as f:
         model = pickle.load(f)
     
-    # Recreate the polynomial transformer used in the notebook (degree 3)
-    poly = PolynomialFeatures(degree=2)
+    # Initialize the same Polynomial transformer used in training (Degree 3)
+    poly = PolynomialFeatures(degree=3)
     
-    # The transformer needs to be "fitted" to the structure of the data. 
-    # Based on the notebook, it was trained on 5 features.
-    # We simulate a fit with dummy data to prepare the transformer.
-    dummy_data = np.zeros((1, 5)) 
-    poly.fit(dummy_data)
+    # We need to fit the transformer once so it knows the input shape (5 features)
+    # Features: Length1, Length2, Length3, Height, Width
+    poly.fit(np.zeros((1, 5))) 
     
     return model, poly
 
-try:
-    model, poly = load_model_and_poly()
+model, poly = load_resources()
 
-    st.title("🐟 Fish Weight Prediction")
-    st.write("Enter the physical measurements of the fish to predict its weight in grams.")
+# --- User Interface ---
+st.title("🐟 Fish Weight Prediction App")
+st.markdown("""
+This app predicts the weight of a fish based on its physical measurements 
+using a **Polynomial Regression Model**.
+""")
 
-    # --- Sidebar Inputs ---
-    st.sidebar.header("Fish Measurements")
+st.sidebar.header("Input Fish Measurements")
+
+def user_input_features():
+    l1 = st.sidebar.number_input("Vertical Length (Length1)", value=23.2)
+    l2 = st.sidebar.number_input("Diagonal Length (Length2)", value=25.4)
+    l3 = st.sidebar.number_input("Cross Length (Length3)", value=30.0)
+    height = st.sidebar.number_input("Height", value=11.5)
+    width = st.sidebar.number_input("Diagonal Width", value=4.0)
     
-    # Input fields based on the features defined in the notebook 
-    l1 = st.sidebar.number_input("Length1 (Vertical)", min_value=0.0, value=23.2, help="Vertical length in cm")
-    l2 = st.sidebar.number_input("Length2 (Diagonal)", min_value=0.0, value=25.4, help="Diagonal length in cm")
-    l3 = st.sidebar.number_input("Length3 (Cross)", min_value=0.0, value=30.0, help="Cross length in cm")
-    height = st.sidebar.number_input("Height", min_value=0.0, value=11.52, help="Height in cm")
-    width = st.sidebar.number_input("Width", min_value=0.0, value=4.02, help="Diagonal width in cm")
+    data = {'Length1': l1,
+            'Length2': l2,
+            'Length3': l3,
+            'Height': height,
+            'Width': width}
+    return pd.DataFrame(data, index=[0])
 
-    # --- Prediction ---
-    if st.button("Predict Weight"):
-        # Organize inputs into the correct format 
-        input_data = np.array([[l1, l2, l3, height, width]])
-        
-        # Transform inputs to polynomial features 
-        input_poly = poly.transform(input_data)
-        
-        # Make prediction
-        prediction = model.predict(input_poly)
-        
-        # Display results
-        result = max(0, prediction[0]) # Ensure we don't display negative weight
-        st.success(f"### Estimated Weight: {result:.2f} grams")
-        
-        # Metrics context from the notebook 
-        st.info("Note: This prediction is based on a Polynomial Regression model (Degree 3) "
-                "which achieved an R² score of 0.961 during training.")
+df_input = user_input_features()
 
-except FileNotFoundError:
-    st.error("Error: 'fish_poly_model.pkl' not found. Please ensure the model file is in the same directory.")
+# Display the user inputs
+st.subheader("Selected Measurements")
+st.write(df_input)
+
+# --- Prediction Logic ---
+if st.button("Predict Weight"):
+    # 1. Transform the input into polynomial features
+    input_poly = poly.transform(df_input)
+    
+    # 2. Predict using the loaded model
+    prediction = model.predict(input_poly)
+    
+    # 3. Output result
+    weight = max(0, prediction[0]) # Weight cannot be negative
+    st.success(f"### Predicted Weight: {weight:.2f} grams")
+
+    st.info(f"Model Accuracy (R²): 0.961")
