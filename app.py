@@ -28,7 +28,7 @@ try:
     inputs = []
     cols = st.columns(4) # Distribute inputs in 4 columns for better UI
     
-    for i in range(26):
+    for i in range(5):
         with cols[i % 4]:
             val = st.number_input(f"Feature {i+1}", value=0.0, step=0.1, format="%.2f")
             inputs.append(val)
