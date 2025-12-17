@@ -11,11 +11,11 @@ st.set_page_config(page_title="Fish Weight Predictor", layout="centered")
 @st.cache_resource
 def load_model_and_poly():
     # Load the pre-trained linear regression model
-    with open('fish_poly_model.pkl', 'rb') as f:
+    with open('fish_poly_model (1).pkl', 'rb') as f:
         model = pickle.load(f)
     
     # Recreate the polynomial transformer used in the notebook (degree 3)
-    poly = PolynomialFeatures(degree=3)
+    poly = PolynomialFeatures(degree=2)
     
     # The transformer needs to be "fitted" to the structure of the data. 
     # Based on the notebook, it was trained on 5 features.
