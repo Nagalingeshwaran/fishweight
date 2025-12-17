@@ -1,38 +1,51 @@
 import streamlit as st
 import pandas as pd
+import joblib
 import numpy as np
-import pickle
-from sklearn.preprocessing import PolynomialFeatures
 
-# Set up the app title and description
-st.title("🐟 Fish Prediction App")
-st.write("Enter the input feature below to get a prediction from the polynomial regression model.")
+# Set page config
+st.set_page_config(page_title="Fish Weight Predictor", layout="wide")
+
+st.title("🐟 Fish Weight Prediction App")
+st.write("""
+This app uses a Polynomial Linear Regression model to predict the weight of a fish 
+based on 26 distinct features.
+""")
 
 # Load the model
 @st.cache_resource
 def load_model():
-    with open('fish_poly_model (1).pkl', 'rb') as file:
-        model = pickle.load(file)
-    return model
+    # Ensure fish_poly_model.pkl is in the same directory
+    return joblib.load("fish_poly_model.pkl")
 
-model = load_model()
-
-# User Input
-# Replace 'Input Feature' with the actual name (e.g., 'Age' or 'Length')
-user_input = st.number_input("Enter the input value:", min_value=0.0, value=1.0, step=0.1)
-
-if st.button("Predict"):
-    # 1. Reshape input for sklearn
-    X_input = np.array([[user_input]])
+try:
+    model = load_model()
     
-    # 2. Transform to Polynomial Features
-    # Note: adjust 'degree' if your model used something other than 2
-    poly = PolynomialFeatures(degree=2, include_bias=False)
-    X_poly = poly.fit_transform(X_input)
-    
-    # 3. Make Prediction
-    prediction = model.predict(X_poly)
-    
-    # 4. Display Result
-    st.success(f"The predicted value is: {prediction[0]:.2f}")
+    st.sidebar.header("Input Fish Metrics")
+    st.sidebar.info("The model requires 26 numerical features (polynomial features).")
 
+    # Create 26 input fields dynamically
+    inputs = []
+    cols = st.columns(4) # Distribute inputs in 4 columns for better UI
+    
+    for i in range(26):
+        with cols[i % 4]:
+            val = st.number_input(f"Feature {i+1}", value=0.0, step=0.1, format="%.2f")
+            inputs.append(val)
+
+    # Prediction logic
+    if st.button("Predict Weight"):
+        # Reshape input for sklearn
+        input_array = np.array(inputs).reshape(1, -1)
+        prediction = model.predict(input_array)
+        
+        st.success(f"### Predicted Weight: {prediction[0]:.2f} units")
+        
+        # Display the input data for reference
+        with st.expander("View Input Vector"):
+            st.write(input_array)
+
+except FileNotFoundError:
+    st.error("Error: 'fish_poly_model.pkl' not found. Please ensure the file is in the app directory.")
+except Exception as e:
+    st.error(f"An error occurred: {e}")
