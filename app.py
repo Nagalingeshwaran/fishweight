@@ -18,6 +18,6 @@ width = st.number_input("Width", min_value=0.0)
 
 if st.button("Predict"):
     X = np.array([[length1, length2, length3, height, width]])
-    X_poly = poly.transform(X)
-    prediction = model.predict(X_poly)
+    y_poly = poly.transform(X)
+    prediction = model.predict(y_poly)
     st.success(f"Predicted Weight: {prediction[0]:.2f} grams")
