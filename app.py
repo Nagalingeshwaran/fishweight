@@ -9,7 +9,7 @@ st.write("Predict fish weight using a **Polynomial Regression model**")
 
 # Load trained model
 with open("fish_poly_model.pkl", "rb") as f:
-    model = pickle.load(f)
+    poly,model = pickle.load(f)
 
 st.success("✅ Model loaded successfully")
 
